@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LabOps — Denah &amp; Status PC Live</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Overlay gelap untuk drawer sidebar/detail di layar kecil -->
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <!-- KOMPONEN 1: Navigasi Responsif (Persistent Sidebar Desktop / Drawer Tablet) -->
+    <aside id="sidebar" class="sidebar" aria-label="Navigasi Utama">
+      <div class="sidebar-header">
+        <div class="brand">
+          <span class="brand-logo" aria-hidden="true">LO</span>
+          <span class="brand-name">LabOps</span>
+        </div>
+        <button
+          id="btn-close-sidebar"
+          class="icon-btn mobile-only"
+          type="button"
+          aria-label="Tutup menu navigasi"
+        >
+          &times;
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li>
+            <a href="#pc-section" class="nav-link active" data-nav="denah">
+              <span class="nav-icon" aria-hidden="true">&#9638;</span>
+              <span class="nav-label">Denah PC</span>
+            </a>
+          </li>
+          <li>
+            <a href="#booking" class="nav-link" data-nav="booking">
+              <span class="nav-icon" aria-hidden="true">&#128197;</span>
+              <span class="nav-label">Booking Saya</span>
+            </a>
+          </li>
+          <li>
+            <a href="#lapor" class="nav-link" data-nav="lapor">
+              <span class="nav-icon" aria-hidden="true">&#9888;</span>
+              <span class="nav-label">Lapor Kerusakan</span>
+            </a>
+          </li>
+          <li>
+            <a href="#profil" class="nav-link" data-nav="profil">
+              <span class="nav-icon" aria-hidden="true">&#128100;</span>
+              <span class="nav-label">Profil</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="avatar" aria-hidden="true">MH</div>
+          <div class="user-info">
+            <p class="user-name">Mahasiswa</p>
+            <p class="user-role">Mode Akses Lab</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Area Konten Utama -->
+    <div class="main-wrapper">
+      <!-- Top Utility Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button
+            id="btn-toggle-sidebar"
+            class="icon-btn"
+            type="button"
+            aria-label="Buka atau tutup sidebar"
+            aria-expanded="true"
+            aria-controls="sidebar"
+          >
+            &#9776;
+          </button>
+          <div>
+            <h1 class="page-title">Denah &amp; Status PC Live</h1>
+            <p class="page-subtitle">Pantau ketersediaan komputer laboratorium secara real-time</p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="btn-quick-report" class="btn btn-outline" type="button">
+            + Lapor Cepat
+          </button>
+        </div>
+      </header>
+
+      <main id="main-content" class="content">
+        <!-- KOMPONEN 3 (Bagian A): Ringkasan Penghitung Status Live -->
+        <section id="summary-stats" class="stats-grid" aria-label="Ringkasan Status PC">
+          <article class="stat-card">
+            <p class="stat-label">Total Unit Ditampilkan</p>
+            <p id="count-total" class="stat-value">0</p>
+          </article>
+          <article class="stat-card stat-available">
+            <p class="stat-label">Tersedia</p>
+            <p id="count-available" class="stat-value">0</p>
+          </article>
+          <article class="stat-card stat-occupied">
+            <p class="stat-label">Dipakai / Booking</p>
+            <p id="count-occupied" class="stat-value">0</p>
+          </article>
+          <article class="stat-card stat-broken">
+            <p class="stat-label">Rusak / Maintenance</p>
+            <p id="count-broken" class="stat-value">0</p>
+          </article>
+        </section>
+
+        <!-- KOMPONEN 2: Bar Filter & Pencarian PC -->
+        <section id="filter-bar" class="filter-bar" aria-label="Filter dan Pencarian PC">
+          <div class="filter-controls">
+            <div class="input-group search-group">
+              <label for="search-pc" class="sr-only">Cari nomor PC atau spesifikasi</label>
+              <input
+                type="search"
+                id="search-pc"
+                class="form-control"
+                placeholder="Cari kode PC atau software (mis. PC-05, VS Code)..."
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="filter-lab" class="sr-only">Pilih Ruang Lab</label>
+              <select id="filter-lab" class="form-control">
+                <option value="all">Semua Ruang Lab</option>
+                <option value="Lab Komputer 1">Lab Komputer 1</option>
+                <option value="Lab Komputer 2">Lab Komputer 2</option>
+                <option value="Lab Jaringan">Lab Jaringan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="status-pills" role="group" aria-label="Filter berdasarkan status">
+            <button type="button" class="pill active" data-status="all">Semua</button>
+            <button type="button" class="pill" data-status="tersedia">
+              <span class="dot dot-available"></span> Tersedia
+            </button>
+            <button type="button" class="pill" data-status="dipakai">
+              <span class="dot dot-occupied"></span> Dipakai
+            </button>
+            <button type="button" class="pill" data-status="rusak">
+              <span class="dot dot-broken"></span> Rusak
+            </button>
+          </div>
+        </section>
+
+        <!-- KOMPONEN 3 (Bagian B): Grid Denah PC -->
+        <section id="pc-section" class="pc-section" aria-label="Daftar Denah Komputer">
+          <div class="section-header">
+            <h2 class="section-title">Denah Unit Komputer</h2>
+            <p id="grid-hint" class="section-hint">Klik kartu PC untuk melihat spesifikasi, booking, atau melapor.</p>
+          </div>
+
+          <div id="pc-grid" class="pc-grid" aria-live="polite">
+            <!-- Kartu <article class="pc-card"> dirender dinamis oleh script.js -->
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>&copy; 2026 LabOps (Laboratory Operations) &mdash; Sistem Manajemen Laboratorium Kampus</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Navigasi Bawah Khusus Mobile -->
+  <nav class="bottom-nav" aria-label="Navigasi Mobile">
+    <a href="#pc-section" class="bottom-nav-link active" data-nav="denah">
+      <span aria-hidden="true">&#9638;</span>
+      <span>Denah</span>
+    </a>
+    <a href="#booking" class="bottom-nav-link" data-nav="booking">
+      <span aria-hidden="true">&#128197;</span>
+      <span>Booking</span>
+    </a>
+    <a href="#lapor" class="bottom-nav-link" data-nav="lapor">
+      <span aria-hidden="true">&#9888;</span>
+      <span>Lapor</span>
+    </a>
+    <a href="#profil" class="bottom-nav-link" data-nav="profil">
+      <span aria-hidden="true">&#128100;</span>
+      <span>Profil</span>
+    </a>
+  </nav>
+
+  <!-- KOMPONEN 4: Drawer Detail PC (Slide-over Desktop / Bottom Sheet Mobile) -->
+  <aside
+    id="pc-drawer"
+    class="pc-drawer"
+    aria-label="Detail Komputer"
+    aria-hidden="true"
+  >
+    <div class="drawer-header">
+      <div>
+        <h2 id="drawer-pc-id" class="drawer-title">PC-01</h2>
+        <p id="drawer-pc-lab" class="drawer-subtitle">Lab Komputer 1</p>
+      </div>
+      <button id="btn-close-drawer" class="icon-btn" type="button" aria-label="Tutup panel detail">
+        &times;
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="detail-row">
+        <span class="detail-label">Status Saat Ini</span>
+        <span id="drawer-pc-status" class="status-badge">Tersedia</span>
+      </div>
+
+      <div class="detail-block">
+        <h3 class="detail-heading">Spesifikasi Perangkat</h3>
+        <p id="drawer-pc-spec" class="detail-text">-</p>
+      </div>
+
+      <div class="detail-block">
+        <h3 class="detail-heading">Perangkat Lunak Terpasang</h3>
+        <ul id="drawer-pc-software" class="tag-list"></ul>
+      </div>
+
+      <div class="detail-block">
+        <h3 class="detail-heading">Catatan Terakhir</h3>
+        <p id="drawer-pc-note" class="detail-text">-</p>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button id="btn-open-booking" class="btn btn-primary" type="button">
+        Booking PC Ini
+      </button>
+      <button id="btn-open-report" class="btn btn-danger-outline" type="button">
+        Lapor Kerusakan
+      </button>
+    </div>
+  </aside>
+
+  <!-- KOMPONEN 5: Modal Form Booking & Lapor Kerusakan dengan Validasi -->
+  <dialog id="action-modal" class="modal" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h2 id="modal-title" class="modal-title">Form Aksi</h2>
+      <button id="btn-close-modal" class="icon-btn" type="button" aria-label="Tutup modal">
+        &times;
+      </button>
+    </div>
+
+    <form id="labops-form" class="modal-form" novalidate>
+      <input type="hidden" id="form-mode" value="booking" />
+
+      <div class="form-field">
+        <label for="form-pc-select" class="form-label">Nomor PC</label>
+        <select id="form-pc-select" class="form-control" required></select>
+      </div>
+
+      <div class="form-field">
+        <label for="form-nim" class="form-label">NIM Mahasiswa</label>
+        <input
+          type="text"
+          id="form-nim"
+          class="form-control"
+          placeholder="Contoh: 231011400123"
+          inputmode="numeric"
+          required
+        />
+        <small id="error-nim" class="error-text" aria-live="polite"></small>
+      </div>
+
+      <!-- Field khusus Booking -->
+      <div id="booking-fields">
+        <div class="form-field">
+          <label for="form-slot" class="form-label">Slot Waktu Pemakaian</label>
+          <select id="form-slot" class="form-control">
+            <option value="">-- Pilih Jam --</option>
+            <option value="08:00 - 10:00">08:00 - 10:00 WIB</option>
+            <option value="10:00 - 12:00">10:00 - 12:00 WIB</option>
+            <option value="13:00 - 15:00">13:00 - 15:00 WIB</option>
+            <option value="15:00 - 17:00">15:00 - 17:00 WIB</option>
+          </select>
+          <small id="error-slot" class="error-text" aria-live="polite"></small>
+        </div>
+      </div>
+
+      <!-- Field khusus Lapor Kerusakan -->
+      <div id="report-fields" hidden>
+        <div class="form-field">
+          <label for="form-category" class="form-label">Kategori Kendala</label>
+          <select id="form-category" class="form-control">
+            <option value="Hardware">Hardware (Monitor, Keyboard, Mouse, PC Mati)</option>
+            <option value="Software">Software (OS, Aplikasi Error/Belum Terpasang)</option>
+            <option value="Jaringan">Jaringan (Tidak Ada Internet / LAN Putus)</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="form-description" class="form-label">Deskripsi Kerusakan</label>
+          <textarea
+            id="form-description"
+            class="form-control"
+            rows="3"
+            placeholder="Jelaskan kendala secara singkat (minimal 10 karakter)..."
+          ></textarea>
+          <small id="error-description" class="error-text" aria-live="polite"></small>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-modal" type="button" class="btn btn-outline">Batal</button>
+        <button id="btn-submit-form" type="submit" class="btn btn-primary">Kirim</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Notifikasi Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
